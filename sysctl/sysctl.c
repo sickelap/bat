@@ -39,7 +39,7 @@ int get_acpibat(struct sensordev *sndev) {
 				break;
 		}
 
-		if (memcmp(devname, sndev->xname, strlen(devname)) == 0) {
+		if (strncmp(devname, sndev->xname, strlen(devname)) == 0) {
 			return 0;
 		}
 	}

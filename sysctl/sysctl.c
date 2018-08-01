@@ -7,8 +7,23 @@
 #include <err.h>
 #include <errno.h>
 
+int get_acpibat_index(void);
+
 int main() {
-  int mib[3], i, cmp;
+
+  int index;
+
+  if ((index = get_acpibat_index()) == -1) {
+    return -1;
+  }
+
+  printf("acpibat index %d\n", index);
+
+  return 0;
+}
+
+int get_acpibat_index() {
+  int mib[3], index, cmp;
   struct sensordev sndev;
   size_t sdlen = sizeof(sndev);
   char devname[] = "acpibat";
@@ -16,8 +31,8 @@ int main() {
   mib[0] = CTL_HW;
   mib[1] = HW_SENSORS;
 
-  for (i = 0; ; i++) {
-    mib[2] = i;
+  for (index = 0; ; index++) {
+    mib[2] = index;
     if (sysctl(mib, 3, &sndev, &sdlen, NULL, 0) == -1) {
       if (errno == ENXIO)
         continue;
@@ -25,12 +40,10 @@ int main() {
         break;
     }
 
-    cmp = memcmp((char *)devname, (char *)sndev.xname, sizeof(devname) - 1);
-//    printf("%s, %s, %d, (%lu)\n", devname, sndev.xname, cmp, sizeof(devname) - 1);
-    if (cmp == 0) {
-      printf("[%d] %s\n", i, sndev.xname);
+    if (memcmp((char *)devname, (char *)sndev.xname, sizeof(devname) - 1) == 0) {
+      return index;
     }
   }
 
-  return 0;
+  return -1;
 }

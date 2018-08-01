@@ -4,28 +4,27 @@
 #include <sys/sensors.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <err.h>
 #include <errno.h>
 
-int get_acpibat_index(void);
+int get_acpibat(struct sensordev *);
 
 int main() {
+  struct sensordev dev;
 
-  int index;
-
-  if ((index = get_acpibat_index()) == -1) {
+  if ((get_acpibat(&dev)) == -1) {
     return -1;
   }
 
-  printf("acpibat index %d\n", index);
+  printf("found %s\n", dev.xname);
 
   return 0;
 }
 
-int get_acpibat_index() {
+int get_acpibat(struct sensordev *sndev) {
   int mib[3], index, cmp;
-  struct sensordev sndev;
-  size_t sdlen = sizeof(sndev);
+  size_t sdlen = sizeof(struct sensordev);
   char devname[] = "acpibat";
 
   mib[0] = CTL_HW;
@@ -33,15 +32,15 @@ int get_acpibat_index() {
 
   for (index = 0; ; index++) {
     mib[2] = index;
-    if (sysctl(mib, 3, &sndev, &sdlen, NULL, 0) == -1) {
+    if (sysctl(mib, 3, sndev, &sdlen, NULL, 0) == -1) {
       if (errno == ENXIO)
         continue;
       if (errno == ENOENT)
         break;
     }
 
-    if (memcmp((char *)devname, (char *)sndev.xname, sizeof(devname) - 1) == 0) {
-      return index;
+    if (memcmp(devname, sndev->xname, sizeof(devname) - 1) == 0) {
+      return 0;
     }
   }
 

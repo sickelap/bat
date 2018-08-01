@@ -2,7 +2,7 @@
 TODO to populate structure:
 
 from batt_sys.h
-```
+```c
 typedef struct battery {
     int battery_num; // got that
     /* path to battery dir */

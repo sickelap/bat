@@ -11,38 +11,38 @@
 int get_acpibat(struct sensordev *);
 
 int main() {
-  struct sensordev dev;
+	struct sensordev dev;
 
-  if ((get_acpibat(&dev)) == -1) {
-    return -1;
-  }
+	if ((get_acpibat(&dev)) == -1) {
+		return -1;
+	}
 
-  printf("found %s\n", dev.xname);
+	printf("found %s\n", dev.xname);
 
-  return 0;
+	return 0;
 }
 
 int get_acpibat(struct sensordev *sndev) {
-  int mib[3], index, cmp;
-  size_t sdlen = sizeof(struct sensordev);
-  char devname[] = "acpibat";
+	int mib[3], index, cmp;
+	size_t sdlen = sizeof(struct sensordev);
+	char devname[] = "acpibat";
 
-  mib[0] = CTL_HW;
-  mib[1] = HW_SENSORS;
+	mib[0] = CTL_HW;
+	mib[1] = HW_SENSORS;
 
-  for (index = 0; ; index++) {
-    mib[2] = index;
-    if (sysctl(mib, 3, sndev, &sdlen, NULL, 0) == -1) {
-      if (errno == ENXIO)
-        continue;
-      if (errno == ENOENT)
-        break;
-    }
+	for (index = 0; ; index++) {
+		mib[2] = index;
+		if (sysctl(mib, 3, sndev, &sdlen, NULL, 0) == -1) {
+			if (errno == ENXIO)
+				continue;
+			if (errno == ENOENT)
+				break;
+		}
 
-    if (memcmp(devname, sndev->xname, sizeof(devname) - 1) == 0) {
-      return 0;
-    }
-  }
+		if (memcmp(devname, sndev->xname, sizeof(devname) - 1) == 0) {
+			return 0;
+		}
+	}
 
-  return -1;
+	return -1;
 }
